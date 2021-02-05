@@ -37,8 +37,7 @@ def azure_keyvault_set_create_secret():
             print("SECRET " + key + " SUCCESSFULLY CREATE IN " + value)
 
 
-def azure_keyvault_delete_secret():
-    keyvaultname = input("Please type vault name: ")
+def azure_keyvault_delete_secret(keyvaultname: str):
     secretlist = azure_keyvault_secret_list(keyvaultname)
     print("following secrets exist")
     i = 1
@@ -46,7 +45,15 @@ def azure_keyvault_delete_secret():
         print(str(i) + ". " + items)
         i = i + 1
     deletesecretsamount = input("Please enter how many secrets you want to delete: ")
-    for x in range(deletesecretsamount):
+    for x in range(int(deletesecretsamount)):
+        secretname = input("Please enter secret name do delete: ")
+        txt = "az keyvault secret delete --vault-name {} -n {}"
+        cmd = txt.format(keyvaultname, secretname)
+        command = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
+        if command.returncode != 0:
+            print("An error occurred: %s", command.stderr)
+        else:
+            print("SECRET " + secretname + " SUCCESSFULLY DELETED FROM " + keyvaultname + " VAULT NAME")
         
 
 def azure_keyvault_secret_list(keyvaultname: str):
