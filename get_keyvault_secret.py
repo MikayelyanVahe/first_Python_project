@@ -1,5 +1,5 @@
 import subprocess
-# import sys
+import sys
 # from datetime import datetime
 from time import sleep
 import json
@@ -39,12 +39,12 @@ def azure_keyvault_set_create_secret():
 
 def azure_keyvault_delete_secret(keyvaultname: str):
     secretlist = azure_keyvault_secret_list(keyvaultname)
-    print("following secrets exist")
+    print("following secrets exist in " + keyvaultname + "\n")
     i = 1
     for items in secretlist:
         print(str(i) + ". " + items)
         i = i + 1
-    deletesecretsamount = input("Please enter how many secrets you want to delete: ")
+    deletesecretsamount = input("\nPlease enter how many secrets you want to delete: ")
     for x in range(int(deletesecretsamount)):
         secretname = input("Please enter secret name do delete: ")
         txt = "az keyvault secret delete --vault-name {} -n {}"
@@ -53,7 +53,7 @@ def azure_keyvault_delete_secret(keyvaultname: str):
         if command.returncode != 0:
             print("An error occurred: %s", command.stderr)
         else:
-            print("SECRET " + secretname + " SUCCESSFULLY DELETED FROM " + keyvaultname + " VAULT NAME")
+            print("SECRET " + secretname + " SUCCESSFULLY DELETED FROM " + keyvaultname)
         
 
 def azure_keyvault_secret_list(keyvaultname: str):
@@ -111,5 +111,5 @@ def azure_keyvault_create():
 
 
 if __name__ == '__main__':
-
-    azure_keyvault_delete_secret()
+    keyvaultname = input("enter keyvault name: ")
+    azure_keyvault_delete_secret(keyvaultname)
