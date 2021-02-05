@@ -18,6 +18,17 @@ class Bcolors:
     UNDERLINE = '\033[4m'
 
 
+def main_menu():
+    print("\nWelcome to KeyVault management iteractive menu, through this menu it is "
+          "possible different oparations with KeyVault")
+    print("You will be promted depends on oparation you want to apply")
+    print("Create a Keyvault (c) / Create KeyVault secret:value/s (s)")
+    print("List KeyVault secret names (ls) / Show secret/value pair (sh)")
+    print("Backup/restote Keyvault (br)")
+    print("Delete Keyvault (dk) / delete secret (ds)")
+    print("Quit program (q)")
+
+
 def azure_keyvault_set_create_secret():
     secretdict: dict = {}
     secretcount = input("Please enter how many secrets you want to create: ")
@@ -68,8 +79,7 @@ def azure_keyvault_secret_list(keyvaultname: str):
     return entrylist
 
 
-def azure_keyvault_secret_show_by_secret_name():
-    keyvaultname = input("Please type vault name: ")
+def azure_keyvault_secret_show_by_secret_name(keyvaultname: str):
     secretname = input("Please type secret name: ")
     txt = "az keyvault secret show --vault-name {} -n {}"
     cmd = txt.format(keyvaultname, secretname)
@@ -95,11 +105,11 @@ def azure_keyvault_secret_show(keyvaultname: str):
 
 def azure_keyvault_create():
     rg = input("Please type recovery group (default is cargoo-kv-rg-weu1): ") or "cargoo-kv-rg-weu1"
-    vaultname = input("Please type vault name: ")
+    keyvaultname = input("Please type vault name: ")
     location = input("Please type location (default is westeurope): ") or "westeurope"
     sku = input("Please type sku (default is standart): ") or "standard"
     txt = "az keyvault create -g {} -n {} -l {} --sku {}"
-    cmd = txt.format(rg, vaultname, location, sku)
+    cmd = txt.format(rg, keyvaultname, location, sku)
     command = subprocess.Popen(["powershell", "-Command", cmd], text=True)
     while command.poll() is None:
         print("--Running--")
@@ -107,9 +117,44 @@ def azure_keyvault_create():
     if command.returncode != 0:
         print("An error occurred: %s", command.stderr)
     else:
-        print("KeyVault " + vaultname + " successfuly created!!!")
+        print("KeyVault " + keyvaultname + " successfuly created!!!")
+
+
+def azure_keyvault_delete(keyvaultname: str, rg: str):
+    # rg = input("Please type recovery group (default is cargoo-kv-rg-weu1): ") or "cargoo-kv-rg-weu1"
+    # keyvaultname = input("Please type vault name you want to delete: ")
+    txt = "az keyvault delete --name {} -g {}"
+    cmd = txt.format(keyvaultname, rg)
+    command = subprocess.Popen(["powershell", "-Command", cmd], text=True)
+    while command.poll() is None:
+        print("--Running--")
+        sleep(5)
+    if command.returncode != 0:
+        print("An error occurred: %s", command.stderr)
+    else:
+        print("KeyVault " + keyvaultname + " successfuly deleted!!!")
 
 
 if __name__ == '__main__':
-    keyvaultname = input("enter keyvault name: ")
-    azure_keyvault_delete_secret(keyvaultname)
+
+    trigger = False
+    while trigger is False:
+        main_menu()
+        answer = input("Please choose opration: ")
+        if answer == "c":
+            print("Answer is c")
+            trigger = False
+        elif answer == "s":
+            print("Answer is s")
+            trigger = False
+        elif answer == "q":
+            print("Answer is s")
+            trigger = True
+        else:
+            print("wrong answer is typed")
+            trigger = False
+    print("Script will be interrupted")
+    sys.exit()
+
+
+
