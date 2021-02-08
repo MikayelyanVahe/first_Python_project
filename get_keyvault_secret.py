@@ -18,15 +18,18 @@ class Bcolors:
     UNDERLINE = '\033[4m'
 
 
-def main_menu():
+def welcome_menu():
     print("\nWelcome to KeyVault management iteractive menu, through this menu it is "
           "possible different oparations with KeyVault")
     print("You will be promted depends on oparation you want to apply")
-    print("Create a Keyvault (c) / Create KeyVault secret:value/s (s)")
-    print("List KeyVault secret names (ls) / Show secret/value pair (sh)")
-    print("Backup/restote Keyvault (br)")
-    print("Delete Keyvault (dk) / delete secret (ds)")
-    print("Quit program (q)")
+
+
+def main_menu():
+    print("\nCreate a Keyvault [c] / Create KeyVault secret:value/s [s]")
+    print("List KeyVault secret names [ls] / Show secret/value pair [sh]")
+    print("Backup/restote Keyvault [br]")
+    print("Delete Keyvault [dk] / delete secret [ds]")
+    print("Quit program [q]")
 
 
 def azure_keyvault_set_create_secret():
@@ -137,24 +140,22 @@ def azure_keyvault_delete(keyvaultname: str, rg: str):
 
 if __name__ == '__main__':
 
+    welcome_menu()
     trigger = False
     while trigger is False:
         main_menu()
         answer = input("Please choose opration: ")
         if answer == "c":
-            print("Answer is c")
+            print("Answer is " + answer)
             trigger = False
         elif answer == "s":
-            print("Answer is s")
+            print("Answer is " + answer)
             trigger = False
         elif answer == "q":
-            print("Answer is s")
+            print("Answer is " + answer)
             trigger = True
         else:
             print("wrong answer is typed")
             trigger = False
     print("Script will be interrupted")
     sys.exit()
-
-
-
