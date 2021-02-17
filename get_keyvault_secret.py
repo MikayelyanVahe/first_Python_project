@@ -212,6 +212,10 @@ if __name__ == '__main__':
             source_rg = input("\nPlease type RG you want to create (default is cargoo-kv-rg-weu1): ") \
                         or "cargoo-kv-rg-weu1"
             source_keyvaultname = input("Please type vault name: ")
+            is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
+            if is_keyvault_exist:
+                azure_keyvault_secret_list(source_keyvaultname)
+
 
         elif answer == "q":
             close_program()
