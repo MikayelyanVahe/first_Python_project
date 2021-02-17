@@ -108,6 +108,7 @@ if __name__ == '__main__':
 
     input("Press Enter to continue ")
     registry_name = input("\nContainer Registry name: ")
+    f.write("\nContainer Registry name: " + registry_name)
     keeptags = int(input("Please enter amount of tags/images you want to keep: "))
     repository_list = check_acr_repo_names(registry_name)
     question = input("do you want to continue deletion of images? (y/n) ")

@@ -106,9 +106,7 @@ def azure_keyvault_secret_show(keyvaultname: str):
         print("\nSECRET NAME: " + key + "\nSECRET VALUE IS: " + value)
 
 
-def azure_keyvault_create():
-    rg = input("Please type recovery group (default is cargoo-kv-rg-weu1): ") or "cargoo-kv-rg-weu1"
-    keyvaultname = input("Please type vault name: ")
+def azure_keyvault_create(keyvaultname, rg):
     location = input("Please type location (default is westeurope): ") or "westeurope"
     sku = input("Please type sku (default is standart): ") or "standard"
     txt = "az keyvault create -g {} -n {} -l {} --sku {}"
@@ -131,31 +129,48 @@ def azure_keyvault_delete(keyvaultname: str, rg: str):
     command = subprocess.Popen(["powershell", "-Command", cmd], text=True)
     while command.poll() is None:
         print("--Running--")
-        sleep(5)
+        sleep(10)
     if command.returncode != 0:
         print("An error occurred: %s", command.stderr)
     else:
         print("KeyVault " + keyvaultname + " successfuly deleted!!!")
 
 
-if __name__ == '__main__':
-
-    welcome_menu()
-    trigger = False
-    while trigger is False:
-        main_menu()
-        answer = input("Please choose opration: ")
-        if answer == "c":
-            print("Answer is " + answer)
-            trigger = False
-        elif answer == "s":
-            print("Answer is " + answer)
-            trigger = False
-        elif answer == "q":
-            print("Answer is " + answer)
-            trigger = True
-        else:
-            print("wrong answer is typed")
-            trigger = False
+def close_program():
     print("Script will be interrupted")
     sys.exit()
+
+
+if __name__ == '__main__':
+
+    default_rg: str = "cargoo-kv-rg-weu1"
+    source_keyvaultname: str = ""
+    welcome_menu()
+    trigger = False
+
+    # While block
+    while trigger is False:
+        main_menu()
+        answer = input("Please choose operation: ")
+
+        # Create Keyvault block
+        if answer == "c":
+            source_rg = input("\nPlease type RG you want to create " + "(default is " + default_rg + ")") or default_rg
+            source_keyvaultname = input("Please type vault name: ")
+            azure_keyvault_create(source_keyvaultname, source_rg)
+            input("\n Press any to retrun main menu: ")
+            trigger = False
+
+        elif answer == "dk":
+            source_rg = input("\nPlease type RG you want to create (default is cargoo-kv-rg-weu1): ") \
+                        or "cargoo-kv-rg-weu1"
+
+            trigger = False
+
+        elif answer == "q":
+            close_program()
+            trigger = True
+
+        else:
+            print("there is no such oparation key")
+            trigger = False
