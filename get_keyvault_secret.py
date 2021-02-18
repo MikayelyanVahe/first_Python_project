@@ -73,9 +73,9 @@ def azure_keyvault_delete_secret(keyvaultname: str):
     for items in secretlist:
         print(str(i) + ". " + items)
         i = i + 1
-    deletesecretsamount = input("\nPlease enter how many secrets you want to delete from : " + keyvaultname + "keyvault")
+    deletesecretsamount = input("\nPlease enter how many secrets want to delete from " + keyvaultname + " keyvault: ")
     for x in range(int(deletesecretsamount)):
-        secretname = input("Please enter secret name do delete: ")
+        secretname = input("Please enter secret name to delete: ")
         txt = "az keyvault secret delete --vault-name {} -n {}"
         cmd = txt.format(keyvaultname, secretname)
         command = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
@@ -94,7 +94,12 @@ def azure_keyvault_secret_list(keyvaultname: str):
     for items in commandoutputlist:
         keyvaultentry = items.get("name")
         entrylist.append(keyvaultentry)
-    return entrylist
+    is_list_empty = len(entrylist)
+    print(is_list_empty)
+    if is_list_empty == 0:
+        return print("There is no secrets in " + keyvaultname + " keyvault")
+    else:
+        return entrylist
 
 
 def azure_keyvault_secret_show_by_secret_name(keyvaultname: str):
@@ -172,7 +177,7 @@ if __name__ == '__main__':
 
         # Create Keyvault block
         if answer == "c":
-            source_rg = input("\nPlease type RG you want to create " + "(default is " + default_rg + "): ") or default_rg
+            source_rg = input("\nPlease type RG name (default is " + default_rg + "): ") or default_rg
             source_keyvaultname = input("Please type vault name: ")
             print("Checking if " + source_keyvaultname + " already exist in " + source_rg + " Resource group")
             is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
@@ -186,14 +191,6 @@ if __name__ == '__main__':
                 input("\n Press enter to return main menu: ")
                 trigger = False
 
-        elif answer == "dk":
-            source_rg = input("\nPlease type RG you want to create (default is cargoo-kv-rg-weu1): ") \
-                        or "cargoo-kv-rg-weu1"
-            source_keyvaultname = input("Please type vault name: ")
-            azure_keyvault_delete(source_keyvaultname, source_rg)
-            input("\nPress enter to return main menu: ")
-            trigger = False
-
         elif answer == "s":
             if not source_keyvaultname:
                 source_keyvaultname = input("Please type vault name: ")
@@ -202,16 +199,16 @@ if __name__ == '__main__':
                 trigger = False
             else:
                 source_keyvaultname = input("Please type vault name " +
-                                            "(or press enter to use current keyvault " + source_keyvaultname + " :") \
+                                            "(or press enter to use current keyvault " + source_keyvaultname + " ): ") \
                                       or source_keyvaultname
                 azure_keyvault_set_create_secret(source_keyvaultname)
                 input("\nPress enter to return main menu: ")
                 trigger = False
 
         elif answer == "ls":
-            source_rg = input("\nPlease type RG you want to create (default is cargoo-kv-rg-weu1): ") \
-                        or "cargoo-kv-rg-weu1"
+            source_rg = input("\nPlease type RG name (default is " + default_rg + "): ") or default_rg
             source_keyvaultname = input("Please type vault name: ")
+            print("Checking if " + source_keyvaultname + " already exist in " + source_rg + " Resource group")
             is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
             if is_keyvault_exist:
                 item_count: int = 1
@@ -219,6 +216,7 @@ if __name__ == '__main__':
                 print("Following secrets exist in " + source_keyvaultname + "\n")
                 for items in keyvault_list:
                     print(str(item_count) + ". " + items)
+                    item_count = item_count + 1
                 input("\nPress enter to return main menu: ")
                 trigger = False
             else:
@@ -227,12 +225,40 @@ if __name__ == '__main__':
                 trigger = False
 
         elif answer == "sh":
-            source_rg = input("\nPlease type RG you want to create (default is cargoo-kv-rg-weu1): ") \
-                        or "cargoo-kv-rg-weu1"
+            source_rg = input("\nPlease type RG name (default is " + default_rg + "): ") or default_rg
             source_keyvaultname = input("Please type vault name: ")
+            print("Checking if " + source_keyvaultname + " already exist in " + source_rg + " Resource group")
             is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
             if is_keyvault_exist:
                 azure_keyvault_secret_show(source_keyvaultname)
+                input("\nPress enter to return main menu: ")
+                trigger = False
+            else:
+                print("\nThere is no such keyvault")
+                input("Press enter to return main menu: ")
+                trigger = False
+
+        elif answer == "dk":
+            source_rg = input("\nPlease type RG name (default is " + default_rg + "): ") or default_rg
+            source_keyvaultname = input("Please type vault name: ")
+            print("Checking if " + source_keyvaultname + " already exist in " + source_rg + " Resource group")
+            is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
+            if is_keyvault_exist:
+                azure_keyvault_delete(source_keyvaultname, source_rg)
+                input("\nPress enter to return main menu: ")
+                trigger = False
+            else:
+                print("\nThere is no such keyvault")
+                input("Press enter to return main menu: ")
+                trigger = False
+
+        elif answer == "ds":
+            source_rg = input("\nPlease type RG name (default is " + default_rg + "): ") or default_rg
+            source_keyvaultname = input("Please type vault name: ")
+            print("Checking if " + source_keyvaultname + " already exist in " + source_rg + " Resource group")
+            is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
+            if is_keyvault_exist:
+                azure_keyvault_delete_secret(source_keyvaultname)
                 input("\nPress enter to return main menu: ")
                 trigger = False
             else:
