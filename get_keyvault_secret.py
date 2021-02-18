@@ -119,7 +119,7 @@ def azure_keyvault_secret_show(keyvaultname: str):
         secret_value = jsonloader["value"]
         keyvultsecretdict[item] = secret_value
     for key, value in keyvultsecretdict.items():
-        print("\n" + str(i) + ". SECRET NAME: " + key + "\nSECRET VALUE IS: " + value)
+        print("\n" + str(i) + ". SECRET NAME: " + key + "\n" + str(i) + ". SECRET VALUE IS: " + value)
         i = i + 1
 
 
@@ -214,14 +214,36 @@ if __name__ == '__main__':
             source_keyvaultname = input("Please type vault name: ")
             is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
             if is_keyvault_exist:
-                azure_keyvault_secret_list(source_keyvaultname)
+                item_count: int = 1
+                keyvault_list = azure_keyvault_secret_list(source_keyvaultname)
+                print("Following secrets exist in " + source_keyvaultname + "\n")
+                for items in keyvault_list:
+                    print(str(item_count) + ". " + items)
+                input("\nPress enter to return main menu: ")
+                trigger = False
+            else:
+                print("\nThere is no such keyvault")
+                input("Press enter to return main menu: ")
+                trigger = False
 
-
+        elif answer == "sh":
+            source_rg = input("\nPlease type RG you want to create (default is cargoo-kv-rg-weu1): ") \
+                        or "cargoo-kv-rg-weu1"
+            source_keyvaultname = input("Please type vault name: ")
+            is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
+            if is_keyvault_exist:
+                azure_keyvault_secret_show(source_keyvaultname)
+                input("\nPress enter to return main menu: ")
+                trigger = False
+            else:
+                print("\nThere is no such keyvault")
+                input("Press enter to return main menu: ")
+                trigger = False
 
         elif answer == "q":
             close_program()
             trigger = True
 
         else:
-            print("there is no such oparation key defined")
+            print("\nthere is no such oparation key defined")
             trigger = False
