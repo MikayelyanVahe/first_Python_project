@@ -4,8 +4,9 @@ import sys
 
 if __name__ == '__main__':
 
-    isTrue: bool = True
-    if isTrue:
+    isTrue: bool = False
+
+    if not isTrue:
         print("Yes")
     else:
         print("No")
