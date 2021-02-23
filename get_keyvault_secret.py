@@ -73,52 +73,7 @@ def azure_keyvault_set_create_secret(keyvaultname: str):
         if command.returncode != 0:
             print("An error occurred: %s", command.stderr)
         else:
-            print("SECRET " + key + " SUCCESSFULLY CREATE with " + value)
-
-
-def azure_keyvault_delete_secret(keyvaultname: str, secretlist: list):
-    # secretlist = azure_keyvault_secret_list(keyvaultname)
-    if len(secretlist) != 0:
-        print("following secrets exist in " + keyvaultname + "\n")
-        i = 1
-        for items in secretlist:
-            print(str(i) + ". " + items)
-            i = i + 1
-        deletesecretsamount = input("\nPlease enter how many secrets want to delete from " + keyvaultname
-                                    + " keyvault: ")
-        for x in range(int(deletesecretsamount)):
-            delete_permanent_question = input("Permanently delete the specified secret (yes/no): ")
-            if delete_permanent_question.casefold() == "no":
-                secretname = input("Please enter secret name for soft delete: ")
-                txt = "az keyvault secret delete --vault-name {} -n {}"
-                cmd = txt.format(keyvaultname, secretname)
-                command = subprocess.run(["powershell", "-Command", cmd], capture_output=True)
-                if command.returncode != 0:
-                    print("An error occurred: %s", command.stderr)
-                else:
-                    print("SECRET " + secretname + " SUCCESSFULLY DELETED FROM " + keyvaultname)
-            else:
-                secretname = input("Please enter secret name to delete permanently: ")
-                txt = "az keyvault secret delete --vault-name {} -n {}"
-                cmd = txt.format(keyvaultname, secretname)
-                command = subprocess.Popen(["powershell", "-Command", cmd], text=True)
-                while command.poll() is None:
-                    print("--Deleting secret--")
-                    sleep(5)
-                if command.returncode != 0:
-                    print("An error occurred: %s", command.stderr)
-                else:
-                    print("deleting secret " + secretname + " permanently")
-                    txt = "az keyvault secret purge --vault-name {} -n {}"
-                    cmd = txt.format(keyvaultname, secretname)
-                    command1 = subprocess.Popen(["powershell", "-Command", cmd], text=True)
-                    while command1.poll() is None:
-                        print("Please wait")
-                        sleep(10)
-                    else:
-                        print("SECRET " + secretname + " PERMANENTLY DELETED FROM " + keyvaultname + " SUCCESSFULLY")
-    else:
-        input("Press enter to continue")
+            print("SECRET " + key + " SUCCESSFULLY CREATE!!!")
 
 
 def azure_keyvault_secret_list(keyvaultname: str):
@@ -168,7 +123,7 @@ def azure_keyvault_secret_show(keyvaultname: str, inputlist: list):
         secret_value = jsonloader["value"]
         keyvultsecretdict[item] = secret_value
     for key, value in keyvultsecretdict.items():
-        print("\n" + str(i) + ". SECRET NAME: " + key + "\n" + str(i) + ". SECRET VALUE IS: " + value)
+        print("\n" + str(i) + ".  SECRET NAME:  " + key + "\n    SECRET VALUE: " + value)
         i = i + 1
 
 
@@ -185,6 +140,49 @@ def azure_keyvault_create(keyvaultname: str, rg: str):
         print("An error occurred: %s", command.stderr)
     else:
         print("KeyVault " + keyvaultname + " successfuly created!!!")
+
+
+def azure_keyvault_delete_secret_purge(keyvaultname: str, secretname: str):
+    print("deleting secret " + secretname + " permanently")
+    txt = "az keyvault secret purge --vault-name {} -n {}"
+    cmd = txt.format(keyvaultname, secretname)
+    command1 = subprocess.Popen(["powershell", "-Command", cmd], text=True)
+    while command1.poll() is None:
+        sleep(10)
+    print("SECRET " + secretname + " PERMANENTLY DELETED FROM " + keyvaultname + " SUCCESSFULLY")
+
+
+def azure_keyvault_delete_secret(keyvaultname: str, secretlist: list):
+    secret_for_purge: list = []
+    secrets_not_for_purge: list = []
+    print("following secrets exist in " + keyvaultname + "\n")
+    i = 1
+    for secrets in secretlist:
+        print(str(i) + ". " + secrets)
+        i = i + 1
+    delete_secrets_amount = input("\nHow many secrets want to delete from " + keyvaultname + " keyvault: ")
+    for x in range(int(delete_secrets_amount)):
+        secretname = input("Enter secret name to delete: ")
+        permanent_delete_question = input("Delete permanently ? (yes/no): ")
+        if permanent_delete_question.casefold() == "yes":
+            secret_for_purge.append(secretname)
+        else:
+            secrets_not_for_purge.append(secretname)
+    for secret_item in secrets_not_for_purge:
+        txt = "az keyvault secret delete --vault-name {} -n {}"
+        cmd = txt.format(keyvaultname, secret_item)
+        command = subprocess.Popen(["powershell", "-Command", cmd], text=True)
+        while command.poll() is None:
+            print("--Deleting secret--")
+            sleep(5)
+    if command.returncode != 0:
+        print("An error occurred: %s", command.stderr)
+    else:
+        sleep(1)
+        print("SECRET " + secretname + " SUCCESSFULLY DELETED FROM " + keyvaultname + "KYEVAULT")
+    print("--Deleting selected secrets permanently--")
+    for y in secret_for_purge:
+        azure_keyvault_delete_secret_purge(keyvaultname, y)
 
 
 def azure_keyvault_delete(keyvaultname: str, rg: str):
@@ -244,7 +242,7 @@ if __name__ == '__main__':
                 keyvault_list_s = azure_keyvault_secret_list(source_keyvaultname)
                 if len(keyvault_list_s) != 0:
                     item_count = 1
-                    print("Following secrets exist in " + source_keyvaultname + " keyvault")
+                    print("Following secrets exist in " + source_keyvaultname + " keyvault\n")
                     for items in keyvault_list_s:
                         print(str(item_count) + ". " + items)
                         item_count = item_count + 1
@@ -291,6 +289,9 @@ if __name__ == '__main__':
             print("Checking if " + source_keyvaultname + " already exist in " + source_rg + " Resource group")
             is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
             if is_keyvault_exist:
+                print("Keyvalt " + source_keyvaultname + " exist")
+                sleep(1)
+                print("Retriving secret list from " + source_keyvaultname + " keyvault \n--Please wait--")
                 secret_list_sh = azure_keyvault_secret_list(source_keyvaultname)
                 if len(secret_list_sh) != 0:
                     azure_keyvault_secret_show(source_keyvaultname, secret_list_sh)
@@ -337,6 +338,7 @@ if __name__ == '__main__':
             source_keyvaultname = input("Please type vault name: ")
             print("Checking if " + source_keyvaultname + " already exist in " + source_rg + " Resource group")
             is_keyvault_exist = check_azure_keyvault(source_keyvaultname, source_rg)
+            sleep(1)
             if is_keyvault_exist:
                 secret_list_ds = azure_keyvault_secret_list(source_keyvaultname)
                 if len(secret_list_ds) != 0:
@@ -348,8 +350,8 @@ if __name__ == '__main__':
                     input("\nPress enter to return main menu: ")
                     trigger = False
             else:
-                print("\nThere is no such keyvault")
-                input("Press enter to return main menu: ")
+                print("There is no such keyvault")
+                input("\nPress enter to return main menu: ")
                 trigger = False
 
         elif answer == "br":
@@ -369,8 +371,8 @@ if __name__ == '__main__':
                     print("Backup completed")
                     sleep(1)
                     print("Starting resore process")
-                    destination_rg = input("Please type destination RG name (default is " + default_rg + "): ") or \
-                                     default_rg
+                    destination_rg = input("Please type destination RG name (default is " + default_rg +
+                                           "): ") or default_rg
                     destination_keyvaultname = input("Please type destination vault name: ")
                     print("Checking if " + destination_keyvaultname + " keyvault already exist in destination" +
                           destination_rg + " Resource group")
@@ -388,7 +390,8 @@ if __name__ == '__main__':
                         azure_keyvault_set_create_secret_for_restor(destination_keyvaultname, source_keyvaultname_dict)
                     else:
                         print("Destination " + destination_keyvaultname + " keyvault alerady exist")
-                        input("Press enter to start restoration to destination " + destination_keyvaultname + " keyvault: ")
+                        input("Press enter to start restoration to destination " + destination_keyvaultname
+                              + " keyvault: ")
                         print("Creating secret/value for destination " + destination_keyvaultname + " Keyvault")
                         azure_keyvault_set_create_secret_for_restor(destination_keyvaultname, source_keyvaultname_dict)
                 else:
