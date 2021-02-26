@@ -27,6 +27,7 @@ def welcome_menu():
 def main_menu():
     print("\nCreate a Keyvault [c] / Create KeyVault secret:value(s) [s]")
     print("List KeyVault secret names [ls] / Show secret/value pair [sh]")
+    print("Purge secret [ps] / Purge Keyvault [ps]")
     print("Delete Keyvault [dk] / delete secret [ds]")
     print("Backup/restote Keyvault [br]")
     print("Quit program [q]")
